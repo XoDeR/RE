@@ -1,0 +1,25 @@
+#
+# Src
+#
+---
+
+# demos which load data at runtime need to start in the right directory:
+run:
+    shaderc:
+        cwd: .
+    texturec:
+        cwd: .
+    geometryc:
+        cwd: .
+    makedisttex:
+        cwd: .
+
+    20-nanovg:
+        cwd: Third/bgfx/examples/runtime
+exports:
+    header-dirs:
+        - Third/bgfx/include
+        - Third/bgfx/examples/common
+        - Third/bx/include
+    modules:
+        bgfx: .
