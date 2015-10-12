@@ -340,6 +340,48 @@ fips_begin_app(AiBots cmdline)
 		blendish.h
 		nanovg.cpp
 	)
+	fips_dir(AiBots/Core/Base GROUP "Core/Base")
+	fips_files(
+		Config.h
+		Platform.h
+		Types.h
+	)
+	fips_dir(AiBots/Core/Debug GROUP "Core/Debug")
+	if (FIPS_MACOS OR FIPS_IOS OR FIPS_LINUX OR FIPS_ANDROID)
+    elseif (FIPS_WINDOWS)
+        fips_files(
+			Error.cpp
+			Error.h
+			StackTrace.h
+			Windows/StackTrace_Windows.cpp
+		)
+	endif()
+	fips_dir(AiBots/Core/Thread GROUP "Core/Thread")
+	if (FIPS_MACOS OR FIPS_IOS OR FIPS_LINUX OR FIPS_ANDROID)
+        fips_files(
+			AtomicInt.h
+			Mutex.h
+			ScopedMutex.h
+			Semaphore.h
+			Thread.h
+			Posix/AtomicInt_Posix.cpp
+			Posix/Mutex_Posix.cpp
+			Posix/Semaphore_Posix.cpp
+			Posix/Thread_Posix.cpp
+		)
+    elseif (FIPS_WINDOWS)
+        fips_files(
+			AtomicInt.h
+			Mutex.h
+			ScopedMutex.h
+			Semaphore.h
+			Thread.h
+			Windows/AtomicInt_Windows.cpp
+			Windows/Mutex_Windows.cpp
+			Windows/Semaphore_Windows.cpp
+			Windows/Thread_Windows.cpp
+		)
+	endif()
 	fips_dir(AiBots/Core/Memory GROUP "Core/Memory")
 	fips_dir(AiBots/Core/Containers GROUP "Core/Containers")
 	
