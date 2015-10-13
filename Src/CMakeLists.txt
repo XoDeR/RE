@@ -345,7 +345,16 @@ fips_begin_app(AiBots cmdline)
 		Config.h
 		Platform.h
 		Types.h
+		Murmur.h
+		Murmur.cpp
 	)
+	fips_dir(AiBots/Core/Os GROUP "Core/Os")
+	if (FIPS_MACOS OR FIPS_IOS OR FIPS_LINUX OR FIPS_ANDROID)
+    elseif (FIPS_WINDOWS)
+        fips_files(
+			Windows/Headers_Windows.h
+		)
+	endif()
 	fips_dir(AiBots/Core/Debug GROUP "Core/Debug")
 	if (FIPS_MACOS OR FIPS_IOS OR FIPS_LINUX OR FIPS_ANDROID)
     elseif (FIPS_WINDOWS)
@@ -383,7 +392,38 @@ fips_begin_app(AiBots cmdline)
 		)
 	endif()
 	fips_dir(AiBots/Core/Memory GROUP "Core/Memory")
+	fips_files(
+		Allocator.h
+		HeapAllocator.cpp
+		HeapAllocator.h
+		LinearAllocator.cpp
+		LinearAllocator.h
+		Memory.cpp
+		Memory.h
+		MemoryAux.h
+		PoolAllocator.cpp
+		PoolAllocator.h
+		ProxyAllocator.cpp
+		ProxyAllocator.h
+		ScratchAllocator.cpp
+		ScratchAllocator.h
+		StackAllocator.cpp
+		StackAllocator.h
+		TempAllocator.h
+	)
 	fips_dir(AiBots/Core/Containers GROUP "Core/Containers")
+	fips_files(
+		Array.h
+		Hash.h
+		Queue.h
+	)
+	fips_dir(AiBots/Core/Strings GROUP "Core/Strings")
+	fips_files(
+		StringId32.h
+		StringId32.cpp
+		StringId64.h
+		StringId64.cpp
+	)
 	
     fips_deps(bgfx bgfx-3rdparty app-os)
 fips_end_app()
