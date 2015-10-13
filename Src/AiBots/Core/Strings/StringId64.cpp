@@ -7,7 +7,7 @@ namespace Rio
 {
 
 StringId64::StringId64(const char* str)
-	: id(murmur64(str, strlen(str)))
+	: id(murmur64(str, strLen(str)))
 {
 }
 
