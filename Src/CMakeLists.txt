@@ -424,6 +424,7 @@ fips_begin_app(AiBots cmdline)
 		StringId64.h
 		StringId64.cpp
 		StringUtils.h
+		DynamicString.h
 	)
 	
     fips_deps(bgfx bgfx-3rdparty app-os)
