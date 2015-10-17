@@ -416,6 +416,8 @@ fips_begin_app(AiBots cmdline)
 		Array.h
 		Hash.h
 		Queue.h
+		Vector.h
+		Map.h
 	)
 	fips_dir(AiBots/Core/Strings GROUP "Core/Strings")
 	fips_files(
@@ -425,6 +427,9 @@ fips_begin_app(AiBots cmdline)
 		StringId64.cpp
 		StringUtils.h
 		DynamicString.h
+		StringStream.h
+		Path.h
+		Path.cpp
 	)
 	
     fips_deps(bgfx bgfx-3rdparty app-os)

@@ -42,9 +42,8 @@ namespace Rio
 		template <typename T> void reserve(Queue<T>& q, size_t capacity);
 
 		// Grows the queue to contain at least minCapacity items.
-		// If min_capacity is set to 0, the queue automatically
-		// determines the new capacity based on its size at the
-		// time of call.
+		// If minCapacity is set to 0, the queue automatically
+		// determines the new capacity based on its size at the time of call.
 		template<typename T> void grow(Queue<T>& q, size_t minCapacity);
 
 		// Appends an item to the back of the queue
