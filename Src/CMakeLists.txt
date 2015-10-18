@@ -333,6 +333,7 @@ fips_include_directories(AiBots/App/Os)
 fips_include_directories(AiBots)
 
 fips_begin_app(AiBots cmdline)
+	
 	fips_dir(AiBots/App GROUP "App")
     fips_files(
 		App.cpp
@@ -340,6 +341,7 @@ fips_begin_app(AiBots cmdline)
 		blendish.h
 		nanovg.cpp
 	)
+	
 	fips_dir(AiBots/Core/Base GROUP "Core/Base")
 	fips_files(
 		Config.h
@@ -348,13 +350,17 @@ fips_begin_app(AiBots cmdline)
 		Murmur.h
 		Murmur.cpp
 	)
+	
 	fips_dir(AiBots/Core/Os GROUP "Core/Os")
 	if (FIPS_MACOS OR FIPS_IOS OR FIPS_LINUX OR FIPS_ANDROID)
     elseif (FIPS_WINDOWS)
         fips_files(
 			Windows/Headers_Windows.h
+			Windows/Os_Windows.cpp
+			Os.h
 		)
 	endif()
+	
 	fips_dir(AiBots/Core/Debug GROUP "Core/Debug")
 	if (FIPS_MACOS OR FIPS_IOS OR FIPS_LINUX OR FIPS_ANDROID)
     elseif (FIPS_WINDOWS)
@@ -365,6 +371,7 @@ fips_begin_app(AiBots cmdline)
 			Windows/StackTrace_Windows.cpp
 		)
 	endif()
+	
 	fips_dir(AiBots/Core/Thread GROUP "Core/Thread")
 	if (FIPS_MACOS OR FIPS_IOS OR FIPS_LINUX OR FIPS_ANDROID)
         fips_files(
@@ -391,6 +398,7 @@ fips_begin_app(AiBots cmdline)
 			Windows/Thread_Windows.cpp
 		)
 	endif()
+	
 	fips_dir(AiBots/Core/Memory GROUP "Core/Memory")
 	fips_files(
 		Allocator.h
@@ -411,6 +419,7 @@ fips_begin_app(AiBots cmdline)
 		StackAllocator.h
 		TempAllocator.h
 	)
+	
 	fips_dir(AiBots/Core/Containers GROUP "Core/Containers")
 	fips_files(
 		Array.h
@@ -419,6 +428,7 @@ fips_begin_app(AiBots cmdline)
 		Vector.h
 		Map.h
 	)
+	
 	fips_dir(AiBots/Core/Strings GROUP "Core/Strings")
 	fips_files(
 		StringId32.h
@@ -431,6 +441,15 @@ fips_begin_app(AiBots cmdline)
 		Path.h
 		Path.cpp
 	)
+	
+	fips_dir(AiBots/Core/FileSystem GROUP "Core/FileSystem")
+	if (FIPS_MACOS OR FIPS_IOS OR FIPS_LINUX OR FIPS_ANDROID)
+    elseif (FIPS_WINDOWS)
+        fips_files(
+			Windows/OsFile_Windows.cpp
+			OsFile.h
+		)
+	endif()
 	
     fips_deps(bgfx bgfx-3rdparty app-os)
 fips_end_app()
