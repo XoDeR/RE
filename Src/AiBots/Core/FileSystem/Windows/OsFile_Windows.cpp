@@ -9,7 +9,7 @@ namespace Rio
 		: isEndOfFile(false)
 	{
 		file = CreateFile(path,
-			mode == FOM_READ ? GENERIC_READ : GENERIC_WRITE,
+			mode == FileOpenMode::Read ? GENERIC_READ : GENERIC_WRITE,
 			0,
 			NULL,
 			OPEN_ALWAYS,
@@ -30,25 +30,22 @@ namespace Rio
 	size_t OsFile::read(void* data, size_t size)
 	{
 		RIO_ASSERT(data != NULL, "Data must be != NULL");
-		DWORD bytes_read;
-
-		BOOL result = ReadFile(file, data, size, &bytes_read, NULL);
-
+		DWORD bytesRead;
+		BOOL result = ReadFile(file, data, size, &bytesRead, NULL);
 		RIO_ASSERT(result == TRUE, "Unable to read from file");
-
-		if (result && bytes_read == 0)
+		if (result && bytesRead == 0)
 		{
 			isEndOfFile = true;
 		}
-		return bytes_read;
+		return bytesRead;
 	}
 
 	size_t OsFile::write(const void* data, size_t size)
 	{
 		RIO_ASSERT(data != NULL, "Data must be != NULL");
-		DWORD bytes_written;
-		WriteFile(file, data, size, &bytes_written, NULL);
-		RIO_ASSERT(size == bytes_written, "Cannot read from file\n");
+		DWORD bytesWritten;
+		WriteFile(file, data, size, &bytesWritten, NULL);
+		RIO_ASSERT(size == bytesWritten, "Cannot read from file\n");
 		return size;
 	}
 

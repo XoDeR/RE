@@ -7,19 +7,19 @@
 namespace Rio
 {
 
-struct StringId32
-{
-	uint32_t id;
+	struct StringId32
+	{
+		uint32_t id;
 
-	StringId32() : id(0) {}
+		StringId32() : id(0) {}
 	explicit StringId32(uint32_t id) : id(id) {}
-	explicit StringId32(const char* str);
+		explicit StringId32(const char* str);
 	StringId32(const char* str, uint32_t len);
-	StringId32 operator=(StringId32 a) { id = a.id; return *this; }
-	bool operator==(StringId32 a) const { return id == a.id; }
-	bool operator!=(StringId32 a) const { return id != a.id; }
-	bool operator<(StringId32 a) const { return id < a.id; }
-	uint32_t getId() const { return id; }
-};
+		StringId32 operator=(StringId32 a) { id = a.id; return *this; }
+		bool operator==(StringId32 a) const { return id == a.id; }
+		bool operator!=(StringId32 a) const { return id != a.id; }
+		bool operator<(StringId32 a) const { return id < a.id; }
+		uint32_t getId() const { return id; }
+	};
 
-} // namespace Rio
+} //namespace Rio

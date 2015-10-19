@@ -21,5 +21,4 @@ struct StringId64
 	bool operator<(StringId64 a) const { return id < a.id; }
 	uint64_t getId() const { return id; }
 };
-
 } // namespace Rio
