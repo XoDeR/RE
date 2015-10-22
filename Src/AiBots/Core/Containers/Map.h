@@ -36,6 +36,19 @@ namespace Rio
 		Vector<Node> data;
 	};
 
+	template <typename TKey, typename TValue>
+	inline Map<TKey, TValue>::Map(Allocator& a)
+		: data(a)
+	{
+		MapFn::clear(*this);
+	}
+
+	template <typename TKey, typename TValue>
+	inline const TValue& Map<TKey, TValue>::operator[](const TKey& key) const
+	{
+		return MapFn::get(*this, key, TValue());
+	}
+
 	// Functions to manipulate Map
 	namespace MapFn
 	{
@@ -729,17 +742,6 @@ namespace Rio
 		}
 	} // namespace MapFn
 
-	template <typename TKey, typename TValue>
-	inline Map<TKey, TValue>::Map(Allocator& a)
-		: data(a)
-	{
-		MapFn::clear(*this);
-	}
 
-	template <typename TKey, typename TValue>
-	inline const TValue& Map<TKey, TValue>::operator[](const TKey& key) const
-	{
-		return MapFn::get(*this, key, TValue());
-	}
 
 } // namespace Rio
