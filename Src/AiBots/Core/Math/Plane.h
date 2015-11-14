@@ -9,12 +9,16 @@
 
 namespace Rio
 {
-
 	// 3D Plane.
 	// The form is ax + by + cz + d = 0
 	// where: d = -Vector3Fn::dot(n, p)
 	struct Plane
 	{
+		static const Plane Zero; //= Plane(Vector3::Zero, 0.0);
+		static const Plane Xaxis; //= Plane(Vector3Fn::Xaxis, 0.0);
+		static const Plane Yaxis; //= Plane(Vector3Fn::Yaxis, 0.0);
+		static const Plane Zaxis; //= Plane(Vector3Fn::Zaxis, 0.0);
+
 		// Not optimized
 		Plane();
 		Plane(const Vector3& n, float d);
@@ -34,32 +38,9 @@ namespace Rio
 
 	namespace PlaneFn
 	{
-		// Normalizes the plane and returns its result.
 		Plane& normalize(Plane& p);
 		// Returns the signed distance between plane and point
 		float getDistanceToPoint(const Plane& p, const Vector3& point);
-
-		const Plane ZERO = Plane(Vector3Fn::ZERO, 0.0);
-		const Plane	XAXIS = Plane(Vector3Fn::XAXIS, 0.0);
-		const Plane	YAXIS = Plane(Vector3Fn::YAXIS, 0.0);
-		const Plane	ZAXIS = Plane(Vector3Fn::ZAXIS, 0.0);
-
-		inline Plane& normalize(Plane& p)
-		{
-			float len = Vector3Fn::getLength(p.n);
-
-			if (equals(len, (float) 0.0))
-			{
-				return p;
-			}
-
-			const float inv_len = (float) 1.0 / len;
-
-			p.n *= inv_len;
-			p.d *= inv_len;
-
-			return p;
-		}
 
 		inline float getDistanceToPoint(const Plane& p, const Vector3& point)
 		{

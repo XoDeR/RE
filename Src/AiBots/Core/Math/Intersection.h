@@ -11,6 +11,7 @@ namespace Rio
 	class Plane;
 	class Sphere;
 	class Obb;
+	class Aabb;
 	class Frustum;
 
 	// Returns the distance along ray (from, dir) to intersection point with plane

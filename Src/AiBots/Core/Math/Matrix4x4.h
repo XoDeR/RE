@@ -15,8 +15,11 @@ namespace Rio
 {
 	struct Matrix4x4
 	{
+		static const Matrix4x4 Identity; // = Matrix4x4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+
 		Matrix4x4();
 		Matrix4x4(const Vector3& x, const Vector3& y, const Vector3& z, const Vector3& t);
+		Matrix4x4(const Vector4& a, const Vector4& b, const Vector4& c, const Vector4& d);
 		Matrix4x4(const Quaternion& r, const Vector3& p);
 		Matrix4x4(const Matrix3x3& m);
 
@@ -27,8 +30,8 @@ namespace Rio
 
 		Matrix4x4(const float v[16]);
 
-		float& operator[](uint32_t i);
-		const float& operator[](uint32_t i) const;
+		float& operator[](size_t i);
+		const float& operator[](size_t i) const;
 
 		Matrix4x4& operator+=(const Matrix4x4& a);
 		Matrix4x4& operator-=(const Matrix4x4& a);
@@ -36,7 +39,24 @@ namespace Rio
 		Matrix4x4& operator*=(float k);
 		Matrix4x4& operator/=(float k);
 
-		Vector4 x, y, z, t;
+		union
+		{
+			struct
+			{
+				Vector4 x;
+				Vector4 y;
+				Vector4 z;
+				Vector4 t;
+			};
+			struct
+			{
+				Vector4 data[4];
+			};
+			struct
+			{
+				float floatData[16];
+			};
+		};
 	};
 
 	inline Matrix4x4::Matrix4x4()
@@ -45,7 +65,18 @@ namespace Rio
 	}
 
 	inline Matrix4x4::Matrix4x4(const Vector3& x, const Vector3& y, const Vector3& z, const Vector3& t)
-		: x(x, 0), y(y, 0), z(z, 0), t(t, 1)
+		: x(Vector4(Vector3(x), 0.0f))
+		, y(Vector4(Vector3(y), 0.0f))
+		, z(Vector4(Vector3(z), 0.0f))
+		, t(Vector4(Vector3(t), 1.0f))
+	{
+	}
+
+	inline Matrix4x4::Matrix4x4(const Vector4& a, const Vector4& b, const Vector4& c, const Vector4& d)
+		: x(a)
+		, y(b)
+		, z(c)
+		, t(d)
 	{
 	}
 
@@ -53,47 +84,47 @@ namespace Rio
 		float r1c2, float r2c2, float r3c2, float r4c2,
 		float r1c3, float r2c3, float r3c3, float r4c3,
 		float r1c4, float r2c4, float r3c4, float r4c4)
-		: x(r1c1, r2c1, r3c1, r4c1)
-		, y(r1c2, r2c2, r3c2, r4c2)
-		, z(r1c3, r2c3, r3c3, r4c3)
-		, t(r1c4, r2c4, r3c4, r4c4)
+		: x(Vector4(r1c1, r2c1, r3c1, r4c1))
+		, y(Vector4(r1c2, r2c2, r3c2, r4c2))
+		, z(Vector4(r1c3, r2c3, r3c3, r4c3))
+		, t(Vector4(r1c4, r2c4, r3c4, r4c4))
 	{
 	}
 
 	inline Matrix4x4::Matrix4x4(const Quaternion& r, const Vector3& p)
-		: x(1.0f - 2.0f * r.y * r.y - 2.0f * r.z * r.z, 2.0f * r.x * r.y + 2.0f * r.w * r.z, 2.0f * r.x * r.z - 2.0f * r.w * r.y, 0)
-		, y(2.0f * r.x * r.y - 2.0f * r.w * r.z, 1.0f - 2.0f * r.x * r.x - 2.0f * r.z * r.z, 2.0f * r.y * r.z + 2.0f * r.w * r.x, 0)
-		, z(2.0f * r.x * r.z + 2.0f * r.w * r.y, 2.0f * r.y * r.z - 2.0f * r.w * r.x, 1.0f - 2.0f * r.x * r.x - 2.0f * r.y * r.y, 0)
-		, t(p, 1)
+		: x(Vector4(1.0f - 2.0f * r.y * r.y - 2.0f * r.z * r.z, 2.0f * r.x * r.y + 2.0f * r.w * r.z, 2.0f * r.x * r.z - 2.0f * r.w * r.y, 0))
+		, y(Vector4(2.0f * r.x * r.y - 2.0f * r.w * r.z, 1.0f - 2.0f * r.x * r.x - 2.0f * r.z * r.z, 2.0f * r.y * r.z + 2.0f * r.w * r.x, 0))
+		, z(Vector4(2.0f * r.x * r.z + 2.0f * r.w * r.y, 2.0f * r.y * r.z - 2.0f * r.w * r.x, 1.0f - 2.0f * r.x * r.x - 2.0f * r.y * r.y, 0))
+		, t(Vector4(p, 1))
 	{
 	}
 
 	inline Matrix4x4::Matrix4x4(const Matrix3x3& m)
-		: x(m.x, 0)
-		, y(m.y, 0)
-		, z(m.z, 0)
-		, t(0, 0, 0, 1)
+		: x(Vector4(m.x, 0))
+		, y(Vector4(m.y, 0))
+		, z(Vector4(m.z, 0))
+		, t(Vector4(0, 0, 0, 1))
 	{
 	}
 
 	inline Matrix4x4::Matrix4x4(const float v[16])
-		: x(v[0], v[1], v[2], v[3])
-		, y(v[4], v[5], v[6], v[7])
-		, z(v[8], v[9], v[10], v[11])
-		, t(v[12], v[13], v[14], v[15])
+		: x(Vector4(v[0], v[1], v[2], v[3]))
+		, y(Vector4(v[4], v[5], v[6], v[7]))
+		, z(Vector4(v[8], v[9], v[10], v[11]))
+		, t(Vector4(v[12], v[13], v[14], v[15]))
 	{
 	}
 
-	inline float& Matrix4x4::operator[](uint32_t i)
+	inline float& Matrix4x4::operator[](size_t i)
 	{
 		RIO_ASSERT(i < 16, "Index out of bounds");
-		return Vector4Fn::toFloatPtr(x)[i];
+		return floatData[i];
 	}
 
-	inline const float& Matrix4x4::operator[](uint32_t i) const
+	inline const float& Matrix4x4::operator[](size_t i) const
 	{
 		RIO_ASSERT(i < 16, "Index out of bounds");
-		return Vector4Fn::toFloatPtr(x)[i];
+		return floatData[i];
 	}
 
 	inline Matrix4x4& Matrix4x4::operator+=(const Matrix4x4& a)
@@ -166,15 +197,34 @@ namespace Rio
 		return *this;
 	}
 
+	bool operator==(const Matrix4x4& a, const Matrix4x4& b);
+	bool operator!=(const Matrix4x4& a, const Matrix4x4& b);
 	Matrix4x4 operator+(Matrix4x4 a, const Matrix4x4& b);
 	Matrix4x4 operator-(Matrix4x4 a, const Matrix4x4& b);
 	Matrix4x4 operator*(Matrix4x4 a, float k);
+	Vector4 operator*(const Matrix4x4& a, const Vector4& v);
 	Matrix4x4 operator*(float k, Matrix4x4 a);
 	Matrix4x4 operator/(Matrix4x4 a, float k);
 	Vector3 operator*(const Vector3& v, const Matrix4x4& a);
 	Vector4 operator*(const Vector4& v, const Matrix4x4& a);
 	// Multiplies the matrix  a by b and returns the result. (i.e. transforms first by a then by b)
 	Matrix4x4 operator*(Matrix4x4 a, const Matrix4x4& b);
+	Matrix4x4 hadamardProduct(const Matrix4x4& a, const Matrix4x4& b);
+
+	inline bool operator==(const Matrix4x4& a, const Matrix4x4& b)
+	{
+		for (size_t i = 0; i < 16; i++)
+		{
+			if (a[i] != b[i])
+				return false;
+		}
+		return true;
+	}
+
+	inline bool operator!=(const Matrix4x4& a, const Matrix4x4& b)
+	{
+		return !operator==(a, b);
+	}
 
 	inline Matrix4x4 operator+(Matrix4x4 a, const Matrix4x4& b)
 	{
@@ -194,6 +244,20 @@ namespace Rio
 		return a;
 	}
 
+	inline Vector4 operator*(const Matrix4x4& a, const Vector4& v)
+	{
+
+		const Vector4 mul0 = a[0] * v[0];
+		const Vector4 mul1 = a[1] * v[1];
+		const Vector4 mul2 = a[2] * v[2];
+		const Vector4 mul3 = a[3] * v[3];
+
+		const Vector4 add0 = mul0 + mul1;
+		const Vector4 add1 = mul2 + mul3;
+
+		return add0 + add1;
+	}
+	
 	inline Matrix4x4 operator*(float k, Matrix4x4 a)
 	{
 		a *= k;
@@ -231,10 +295,20 @@ namespace Rio
 		return a;
 	}
 
-	// Functions to manipulate Matrix4x4.
+	inline Matrix4x4 hadamardProduct(const Matrix4x4& a, const Matrix4x4& b)
+	{
+		Matrix4x4 result;
+
+		for (size_t i = 0; i < 4; i++)
+		{
+			result[i] = a[i] * b[i];
+		}
+
+		return result;
+	}
+
 	namespace Matrix4x4Fn
 	{
-		const Matrix4x4 IDENTITY = Matrix4x4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 		// Sets the matrix to perspective.
 		void setToPerspective(Matrix4x4& m, float fovy, float aspect, float near, float far);
 		// Sets the matrix to orthographic.
@@ -279,10 +353,30 @@ namespace Rio
 		const float* toFloatPtr(const Matrix4x4& m);
 		// Returns the rotation portion of the matrix as Matrix3x3
 		Matrix3x3 toMatrix3x3(const Matrix4x4& m);
+		Matrix4x4 quaternionToMatrix4(const Quaternion& q);
+		// NOTE: Assumes matrix is only a rotational matrix and has no shear applied
+		Quaternion matrix4x4ToQuaternion(const Matrix4x4& m);
+
+		//******************************
+		// Transformation
+		//******************************
+
+		Matrix4x4 translate(const Vector3& v);
+		Matrix4x4 rotate(const Radian& angle, const Vector3& v);
+		Matrix4x4 scale(const Vector3& v);
+
+		Matrix4x4 ortho(float left, float right, float bottom, float top);
+		Matrix4x4 ortho(float left, float right, float bottom, float top, float zNear, float zFar);
+
+		Matrix4x4 perspective(const Radian& fovy, float aspect, float zNear, float zFar);
+		Matrix4x4 infinitePerspective(const Radian& fovy, float aspect, float zNear);
+
+		Matrix4x4 lookAtMatrix4(const Vector3& eye, const Vector3& center, const Vector3& up);
+		Quaternion lookAtQuaternion(const Vector3& eye, const Vector3& center, const Vector3& up);
 
 		inline void setToPerspective(Matrix4x4& m, float fovy, float aspect, float near, float far)
 		{
-			const float height = 1.0f / tan(fovy * ((float)PI / 180.0f) * 0.5f);
+			const float height = 1.0f / tan(fovy * ((float)MathFn::Pi / 180.0f) * 0.5f);
 			const float width = height * 1.0f / aspect;
 			const float aa = far / (far - near);
 			const float bb = -near * aa;
@@ -439,7 +533,7 @@ namespace Rio
 			mat.x.z = (+m.x.y * m06m15_m14m07 - m.y.y * m02m15_m14m03 + m.t.y * m02m07_m06m03);
 			mat.x.w = (+m.x.y * m06m11_m10m07 - m.y.y * m02m11_m10m03 + m.z.y * m02m07_m06m03);
 
-			const float inv_det = 1.0f / (m.x.x * mat.x.x - m.y.x * mat.x.y + m.z.x * mat.x.z - m.t.x * mat.x.w);
+			const float invDet = 1.0f / (m.x.x * mat.x.x - m.y.x * mat.x.y + m.z.x * mat.x.z - m.t.x * mat.x.w);
 
 			mat.y.x = (+m.y.x * m10m15_m14m11 - m.z.x * m06m15_m14m07 + m.t.x * m06m11_m10m07);
 			mat.y.y = (+m.x.x * m10m15_m14m11 - m.z.x * m02m15_m14m03 + m.t.x * m02m11_m10m03);
@@ -454,22 +548,22 @@ namespace Rio
 			mat.t.z = (+m.x.x * m05m14_m13m06 - m.y.x * m01m14_m13m02 + m.t.x * m01m06_m05m02);
 			mat.t.w = (+m.x.x * m05m10_m09m06 - m.y.x * m01m10_m09m02 + m.z.x * m01m06_m05m02);
 
-			m.x.x = +mat.x.x * inv_det;
-			m.x.y = -mat.x.y * inv_det;
-			m.x.z = +mat.x.z * inv_det;
-			m.x.w = -mat.x.w * inv_det;
-			m.y.x = -mat.y.x * inv_det;
-			m.y.y = +mat.y.y * inv_det;
-			m.y.z = -mat.y.z * inv_det;
-			m.y.w = +mat.y.w * inv_det;
-			m.z.x = +mat.z.x * inv_det;
-			m.z.y = -mat.z.y * inv_det;
-			m.z.z = +mat.z.z * inv_det;
-			m.z.w = -mat.z.w * inv_det;
-			m.t.x = -mat.t.x * inv_det;
-			m.t.y = +mat.t.y * inv_det;
-			m.t.z = -mat.t.z * inv_det;
-			m.t.w = +mat.t.w * inv_det;
+			m.x.x = +mat.x.x * invDet;
+			m.x.y = -mat.x.y * invDet;
+			m.x.z = +mat.x.z * invDet;
+			m.x.w = -mat.x.w * invDet;
+			m.y.x = -mat.y.x * invDet;
+			m.y.y = +mat.y.y * invDet;
+			m.y.z = -mat.y.z * invDet;
+			m.y.w = +mat.y.w * invDet;
+			m.z.x = +mat.z.x * invDet;
+			m.z.y = -mat.z.y * invDet;
+			m.z.z = +mat.z.z * invDet;
+			m.z.w = -mat.z.w * invDet;
+			m.t.x = -mat.t.x * invDet;
+			m.t.y = +mat.t.y * invDet;
+			m.t.z = -mat.t.z * invDet;
+			m.t.w = +mat.t.w * invDet;
 
 			return m;
 		}
@@ -588,6 +682,35 @@ namespace Rio
 		{
 			return Matrix3x3(getXAxis(m), getYAxis(m), getZAxis(m));
 		}
-	} // namespace Matrix4x4Fn
 
+		inline Matrix4x4 quaternionToMatrix4(const Quaternion& q)
+		{
+			Matrix4x4 mat = Matrix4x4::Identity;
+			const Quaternion a = QuaternionFn::getNormalized(q);
+
+			const float xx = a.x * a.x;
+			const float yy = a.y * a.y;
+			const float zz = a.z * a.z;
+			const float xy = a.x * a.y;
+			const float xz = a.x * a.z;
+			const float yz = a.y * a.z;
+			const float wx = a.w * a.x;
+			const float wy = a.w * a.y;
+			const float wz = a.w * a.z;
+
+			mat[0 * 4 + 0] = 1.0f - 2.0f * (yy + zz);
+			mat[0 * 4 + 1] = 2.0f * (xy + wz);
+			mat[0 * 4 + 2] = 2.0f * (xz - wy);
+
+			mat[1 * 4 + 0] = 2.0f * (xy - wz);
+			mat[1 * 4 + 1] = 1.0f - 2.0f * (xx + zz);
+			mat[1 * 4 + 2] = 2.0f * (yz + wx);
+
+			mat[2 * 4 + 0] = 2.0f * (xz + wy);
+			mat[2 * 4 + 1] = 2.0f * (yz - wx);
+			mat[2 * 4 + 2] = 1.0f - 2.0f * (xx + yy);
+
+			return mat;
+		}
+	} // namespace Matrix4x4Fn
 } // namespace Rio

@@ -4,17 +4,8 @@
 
 #include "Core/Base/Types.h"
 
-#include "Core/Math/MathUtils.h"
-#include "Core/Math/Vector2.h"
+#include "Core/Math/MathFn.h"
 #include "Core/Math/Vector3.h"
-#include "Core/Math/Vector4.h"
-#include "Core/Math/Quaternion.h"
-#include "Core/Math/Matrix3x3.h"
-#include "Core/Math/Matrix4x4.h"
-#include "Core/Math/Aabb.h"
-#include "Core/Math/Obb.h"
-#include "Core/Math/Plane.h"
-#include "Core/Math/Frustum.h"
 
 namespace Rio
 {
@@ -38,7 +29,7 @@ namespace Rio
 
 		inline float getVolume(const Sphere& s)
 		{
-			return float(4.0 / 3.0 * PI) * s.r*s.r*s.r;
+			return float(4.0 / 3.0 * MathFn::Pi) * s.r*s.r*s.r;
 		}
 
 		inline void addPoints(Sphere& s, uint32_t num, const Vector3* points)
@@ -47,7 +38,7 @@ namespace Rio
 			{
 				const float dist = Vector3Fn::getLengthSquared(points[i] - s.c);
 				if (dist >= s.r*s.r)
-					s.r = sqrt(dist);
+					s.r = MathFn::sqrt(dist);
 			}
 		}
 
@@ -60,7 +51,7 @@ namespace Rio
 				if (dist < (spheres[i].r + s.r) * (spheres[i].r + s.r))
 				{
 					if (spheres[i].r * spheres[i].r > s.r * s.r)
-						s.r = sqrt(dist + spheres[i].r * spheres[i].r);
+						s.r = MathFn::sqrt(dist + spheres[i].r * spheres[i].r);
 				}
 			}
 		}

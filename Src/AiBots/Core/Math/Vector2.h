@@ -4,7 +4,8 @@
 
 #include "Core/Debug/Error.h"
 #include "Core/Base/Types.h"
-#include "Core/Math/MathUtils.h"
+
+#include "Core/Math/Angle.h"
 
 namespace Rio
 {
@@ -15,16 +16,25 @@ namespace Rio
 		Vector2(float nx, float ny);
 		Vector2(const float v[2]);
 
-		float& operator[](uint32_t i);
-		const float& operator[](uint32_t i) const;
+		float& operator[](size_t i);
+		const float& operator[](size_t i) const;
 
 		Vector2& operator+=(const Vector2& a);
 		Vector2& operator-=(const Vector2& a);
 		Vector2& operator*=(float k);
 		Vector2& operator/=(float k);
 
-		float x;
-		float y;
+		union
+		{
+			struct
+			{
+				float x;
+				float y;
+			};
+			float data[2];
+		};
+
+		static const Vector2 Zero; // {0, 0}
 	};
 
 	inline Vector2::Vector2()
@@ -32,28 +42,34 @@ namespace Rio
 		// Do not initialize
 	}
 
-	inline Vector2::Vector2(float val) : x(val), y(val)
+	inline Vector2::Vector2(float val) 
+		: x(val) 
+		, y(val)
 	{
 	}
 
-	inline Vector2::Vector2(float nx, float ny) : x(nx), y(ny)
+	inline Vector2::Vector2(float nx, float ny) 
+		: x(nx)
+		, y(ny)
 	{
 	}
 
-	inline Vector2::Vector2(const float a[2]) : x(a[0]), y(a[1])
+	inline Vector2::Vector2(const float a[2]) 
+		: x(a[0])
+		, y(a[1])
 	{
 	}
 
-	inline const float& Vector2::operator[](uint32_t i) const
+	inline const float& Vector2::operator[](size_t i) const
 	{
 		RIO_ASSERT(i < 2, "Index out of bounds");
-		return (&x)[i];
+		return data[i];
 	}
 
-	inline float& Vector2::operator[](uint32_t i)
+	inline float& Vector2::operator[](size_t i)
 	{
 		RIO_ASSERT(i < 2, "Index out of bounds");
-		return (&x)[i];
+		return data[i];
 	}
 
 	inline Vector2& Vector2::operator+=(const Vector2& a)
@@ -82,9 +98,9 @@ namespace Rio
 
 	inline Vector2& Vector2::operator/=(float k)
 	{
-		RIO_ASSERT(k != (float)0.0, "Division by zero");
+		RIO_ASSERT(k != (float)0.0f, "Division by zero");
 
-		float inv = (float)(1.0 / k);
+		float inv = (float)(1.0f / k);
 
 		x *= inv;
 		y *= inv;
@@ -97,6 +113,16 @@ namespace Rio
 	Vector2 operator-(Vector2 a, const Vector2& b);
 	Vector2 operator*(Vector2 a, float k);
 	Vector2 operator*(float k, Vector2 a);
+
+	// Hadamard Product
+	Vector2 operator*(const Vector2& a, const Vector2& b);
+	// Hadamard Product
+	Vector2 operator/(const Vector2& a, const Vector2& b);
+	// Divides the vector by the scalar and returns the result.
+	Vector2 operator/(Vector2 a, float k);
+	// Returns true whether the vectors are equal.
+	bool operator==(const Vector2& a, const Vector2& b);
+	bool operator!=(const Vector2& a, const Vector2& b);
 
 	inline Vector2 operator-(const Vector2& a)
 	{
@@ -133,30 +159,43 @@ namespace Rio
 		return a;
 	}
 
-	inline bool operator==(const Vector2& a, const Vector2& b)
+	inline bool operator!=(const Vector2& a, const Vector2& b)
 	{
-		return equals(a.x, b.x) && equals(a.y, b.y);
+		return !operator==(a, b);
 	}
 
-	// Divides the vector by the scalar and returns the result.
-	Vector2 operator/(Vector2 a, float k);
+	// Hadamard Product
+	inline Vector2 operator*(const Vector2& a, const Vector2& b)
+	{
+		Vector2 result;
+		for (size_t i = 0; i < 2; i++)
+			result[i] = a[i] * b[i];
+		return result;
+	}
 
-	// Returns true whether the vectors are equal.
-	bool operator==(const Vector2& a, const Vector2& b);
+	// Hadamard Product
+	inline Vector2 operator/(const Vector2& a, const Vector2& b)
+	{
+		Vector2 result;
+		for (size_t i = 0; i < 2; i++)
+		{
+			result[i] = a[i] / b[i];
+		}
+		return result;
+	}
 
 	namespace Vector2Fn
 	{
-		const Vector2 ZERO = Vector2(0, 0);
 		float dot(const Vector2& a, const Vector2& b);
 		float getLength(const Vector2& a);
 		float getLengthSquared(const Vector2& a);
 		void setLength(Vector2& a, float len);
-		// Normalizes and returns the result.
-		Vector2 normalize(Vector2& a);
+		// returns normalized vector
+		Vector2 getNormalized(Vector2& a);
 		// Returns the distance between the points
 		float getDistance(const Vector2& a, const Vector2& b);
 		// Returns the angle between the vectors
-		float getAngle(const Vector2& a, const Vector2& b);
+		Radian getAngle(const Vector2& a, const Vector2& b);
 		// Returns the pointer to the data
 		float* toFloatPtr(Vector2& a);
 		const float* toFloatPtr(const Vector2& a);
@@ -165,10 +204,10 @@ namespace Rio
 		{
 			return a.x * b.x + a.y * b.y;
 		}
-		
-		inline float getLength(const Vector2& a)
-		{
-			return sqrt(a.x * a.x + a.y * a.y);
+
+		inline float cross(const Vector2& a, const Vector2& b)
+		{ 
+			return a.x * b.y - b.x * a.y; 
 		}
 		
 		inline float getLengthSquared(const Vector2& a)
@@ -178,30 +217,21 @@ namespace Rio
 		
 		inline void setLength(Vector2& a, float len)
 		{
-			normalize(a);
+			a = getNormalized(a);
 
 			a.x *= len;
 			a.y *= len;
 		}
 
-		inline Vector2 normalize(Vector2& a)
+		inline Vector2 getNormalized(Vector2& a)
 		{
 			float invertedLength = 1.0f / getLength(a);
-
-			a.x *= invertedLength;
-			a.y *= invertedLength;
-
-			return a;
+			return a * invertedLength;
 		}
 
 		inline float getDistance(const Vector2& a, const Vector2& b)
 		{
 			return getLength(b - a);
-		}
-
-		inline float getAngle(const Vector2& a, const Vector2& b)
-		{
-			return acos(dot(a, b) / (getLength(a) * getLength(b)));
 		}
 
 		inline float* toFloatPtr(Vector2& a)
@@ -213,6 +243,7 @@ namespace Rio
 		{
 			return &a.x;
 		}
+
 	} // namespace Vector2Fn
 
 } // namespace Rio

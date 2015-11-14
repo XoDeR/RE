@@ -3,9 +3,12 @@
 
 #include "Core/Math/Vector3.h"
 #include "Core/Math/Obb.h"
+#include "Core/Math/Aabb.h"
 #include "Core/Math/Plane.h"
 #include "Core/Math/Frustum.h"
 #include "Core/Math/Sphere.h"
+
+#include "Core/Math/MathFn.h"
 
 namespace Rio
 {
@@ -30,7 +33,7 @@ namespace Rio
 		{
 			return -1.0f;
 		}
-		return b - sqrt(det);
+		return b - MathFn::sqrt(det);
 	}
 
 	float getRayWithOobIntersection(const Vector3& from, const Vector3& dir, const Obb& obb)
@@ -139,7 +142,7 @@ namespace Rio
 
 		float den = -Vector3Fn::dot(Vector3Fn::cross(n1, n2), n3);
 
-		if (equals(den, (float)0.0))
+		if (MathFn::equals(den, (float)0.0))
 		{
 			return false;
 		}

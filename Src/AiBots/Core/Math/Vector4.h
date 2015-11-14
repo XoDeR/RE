@@ -4,29 +4,70 @@
 
 #include "Core/Debug/Error.h"
 #include "Core/Base/Types.h"
-#include "Core/Math/MathUtils.h"
+
+#include "Core/Math/Vector2.h"
 #include "Core/Math/Vector3.h"
+#include "Core/Math/Angle.h"
 
 namespace Rio
 {
-
 	struct Vector4
 	{
+		static const Vector4 Zero;
+		static const Vector4 Xaxis;// = Vector4(1, 0, 0, 0);
+		static const Vector4 Yaxis;// = Vector4(0, 1, 0, 0);
+		static const Vector4 Zaxis;// = Vector4(0, 0, 1, 0);
+		static const Vector4 Waxis;// = Vector4(0, 0, 0, 1);
+
 		Vector4();
 		Vector4(const Vector3& a, float w);
 		Vector4(float val);
 		Vector4(float nx, float ny, float nz, float nw);
 		Vector4(const float v[4]);
 
-		float& operator[](uint32_t i);
-		const float& operator[](uint32_t i) const;
+		float& operator[](size_t i);
+		const float& operator[](size_t i) const;
 
 		Vector4& operator+=(const Vector4& a);
 		Vector4& operator-=(const Vector4& a);
 		Vector4& operator*=(float k);
 		Vector4& operator/=(float k);
 
-		float x, y, z, w;
+		union
+		{
+			struct
+			{
+				float x, y, z, w;
+			};
+			struct
+			{
+				float r, g, b, a;
+			};
+
+			float data[4];
+
+			struct
+			{
+				Vector2 xy;
+				Vector2 zw;
+			};
+
+			struct
+			{
+				Vector2 rg;
+				Vector2 ba;
+			};
+
+			struct
+			{
+				Vector3 xyz;
+			};
+
+			struct
+			{
+				Vector3 rgb;
+			};
+		};
 	};
 
 	inline Vector4::Vector4()
@@ -35,34 +76,38 @@ namespace Rio
 	}
 
 	inline Vector4::Vector4(const Vector3& a, float w)
-		: x(a.x), y(a.y), z(a.z), w(w)
+		: x(a.x)
+		, y(a.y)
+		, z(a.z)
+		, w(w)
 	{
 	}
 
-	inline Vector4::Vector4(float val) : x(val), y(val), z(val), w(val)
+	inline Vector4::Vector4(float val) 
+		: x(val), y(val), z(val), w(val)
 	{
 	}
 
-	inline Vector4::Vector4(float nx, float ny, float nz, float nw) : x(nx), y(ny), z(nz), w(nw)
+	inline Vector4::Vector4(float nx, float ny, float nz, float nw) 
+		: x(nx), y(ny), z(nz), w(nw)
 	{
 	}
 
-	inline Vector4::Vector4(const float a[4]) : x(a[0]), y(a[1]), z(a[2]), w(a[3])
+	inline Vector4::Vector4(const float a[4]) 
+		: x(a[0]), y(a[1]), z(a[2]), w(a[3])
 	{
 	}
 
-	inline const float& Vector4::operator[](uint32_t i) const
+	inline const float& Vector4::operator[](size_t i) const
 	{
 		RIO_ASSERT(i < 4, "Index out of bounds");
-
-		return (&x)[i];
+		return data[i];
 	}
 
-	inline float& Vector4::operator[](uint32_t i)
+	inline float& Vector4::operator[](size_t i)
 	{
 		RIO_ASSERT(i < 4, "Index out of bounds");
-
-		return (&x)[i];
+		return data[i];
 	}
 
 	inline Vector4& Vector4::operator+=(const Vector4& a)
@@ -97,9 +142,9 @@ namespace Rio
 
 	inline Vector4& Vector4::operator/=(float k)
 	{
-		RIO_ASSERT(k != (float)0.0, "Division by zero");
+		RIO_ASSERT(k != (float)0.0f, "Division by zero");
 
-		float inv = (float)(1.0 / k);
+		float inv = (float)(1.0f / k);
 
 		x *= inv;
 		y *= inv;
@@ -116,6 +161,12 @@ namespace Rio
 	Vector4 operator*(float k, Vector4 a);
 	Vector4 operator/(Vector4 a, float k);
 	bool operator==(const Vector4& a, const Vector4& b);
+	bool operator!=(const Vector4& a, const Vector4& b);
+	// Hadamard Product
+	Vector4 operator*(const Vector4& a, const Vector4& b);
+	// Hadamard Product
+	Vector4 operator/(const Vector4& a, const Vector4& b);
+
 
 	inline Vector4 operator-(const Vector4& a)
 	{
@@ -152,28 +203,43 @@ namespace Rio
 		return a;
 	}
 
-	inline bool operator==(const Vector4& a, const Vector4& b)
+	inline bool operator!=(const Vector4& a, const Vector4& b)
 	{
-		return equals(a.x, b.x) && equals(a.y, b.y) && equals(a.z, b.z) && equals(a.w, b.w);
+		return !operator==(a, b);
+	}
+
+	// Hadamard Product
+	inline Vector4 operator*(const Vector4& a, const Vector4& b)
+	{
+		Vector4 result;
+		for (size_t i = 0; i < 4; i++)
+		{
+			result[i] = a[i] * b[i];
+		}
+		return result;
+	}
+
+	// Hadamard Product
+	inline Vector4 operator/(const Vector4& a, const Vector4& b)
+	{
+		Vector4 result;
+		for (size_t i = 0; i < 4; i++)
+		{
+			result[i] = a[i] / b[i];
+		}
+		return result;
 	}
 
 	namespace Vector4Fn
 	{
-		const Vector4 ZERO = Vector4(0, 0, 0, 0);
-		const Vector4 XAXIS = Vector4(1, 0, 0, 0);
-		const Vector4 YAXIS = Vector4(0, 1, 0, 0);
-		const Vector4 ZAXIS = Vector4(0, 0, 1, 0);
-		const Vector4 WAXIS = Vector4(0, 0, 0, 1);
-
-		/// Returns the dot product
 		float dot(const Vector4& a, const Vector4& b);
 		float getLength(const Vector4& a);
 
 		float getLengthSquared(const Vector4& a);
 		void setLength(Vector4& a, float len);
-		Vector4 normalize(Vector4& a);
+		Vector4 getNormalized(Vector4& a);
 		float getDistance(const Vector4& a, const Vector4& b);
-		float getAngle(const Vector4& a, const Vector4& b);
+		Radian getAngle(const Vector4& a, const Vector4& b);
 		float* toFloatPtr(Vector4& a);
 		const float* toFloatPtr(const Vector4& a);
 		// Returns the Vector3 portion (truncates w)
@@ -184,11 +250,6 @@ namespace Rio
 			return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 		}
 
-		inline float getLength(const Vector4& a)
-		{
-			return sqrt(a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w);
-		}
-
 		inline float getLengthSquared(const Vector4& a)
 		{
 			return a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w;
@@ -196,7 +257,7 @@ namespace Rio
 
 		inline void setLength(Vector4& a, float len)
 		{
-			normalize(a);
+			a = getNormalized(a);
 
 			a.x *= len;
 			a.y *= len;
@@ -204,14 +265,14 @@ namespace Rio
 			a.w *= len;
 		}
 
-		inline Vector4 normalize(Vector4& a)
+		inline Vector4 getNormalized(Vector4& a)
 		{
-			float inv_len = 1.0f / getLength(a);
+			float invLength = 1.0f / getLength(a);
 
-			a.x *= inv_len;
-			a.y *= inv_len;
-			a.z *= inv_len;
-			a.w *= inv_len;
+			a.x *= invLength;
+			a.y *= invLength;
+			a.z *= invLength;
+			a.w *= invLength;
 
 			return a;
 		}
@@ -219,11 +280,6 @@ namespace Rio
 		inline float getDistance(const Vector4& a, const Vector4& b)
 		{
 			return getLength(b - a);
-		}
-
-		inline float getAngle(const Vector4& a, const Vector4& b)
-		{
-			return acos(dot(a, b) / (getLength(a) * getLength(b)));
 		}
 
 		inline float* toFloatPtr(Vector4& a)

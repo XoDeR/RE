@@ -15,7 +15,7 @@
 #include "Core/Math/Obb.h"
 #include "Core/Math/Plane.h"
 #include "Core/Math/Sphere.h"
-#include "Intersection.h"
+#include "Core/Math/Intersection.h"
 
 namespace Rio
 {

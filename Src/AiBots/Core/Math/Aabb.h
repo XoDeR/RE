@@ -58,8 +58,8 @@ namespace Rio
 
 		inline void reset(Aabb& b)
 		{
-			b.min = Vector3Fn::ZERO;
-			b.max = Vector3Fn::ZERO;
+			b.min = Vector3::Zero;
+			b.max = Vector3::Zero;
 		}
 
 		inline Vector3 getCenter(const Aabb& b)
