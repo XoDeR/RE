@@ -56,17 +56,17 @@ namespace Rio
 			return json;
 		}
 
-		JSONValueType::Enum getJsonType(const char* json)
+		JsonValueType::Enum getJsonType(const char* json)
 		{
 			RIO_ASSERT_NOT_NULL(json);
 
 			switch (*json)
 			{
-				case '"': return JSONValueType::STRING;
-				case '{': return JSONValueType::OBJECT;
-				case '[': return JSONValueType::ARRAY;
-				case '-': return JSONValueType::NUMBER;
-				default: return (isdigit(*json)) ? JSONValueType::NUMBER : (*json == 'n' ? JSONValueType::NIL : JSONValueType::BOOL);
+				case '"': return JsonValueType::STRING;
+				case '{': return JsonValueType::OBJECT;
+				case '[': return JsonValueType::ARRAY;
+				case '-': return JsonValueType::NUMBER;
+				default: return (isdigit(*json)) ? JsonValueType::NUMBER : (*json == 'n' ? JsonValueType::NIL : JsonValueType::BOOL);
 			}
 		}
 
@@ -205,7 +205,7 @@ namespace Rio
 			return (float)parseDouble(json);
 		}
 
-		void parseArray(const char* json, Array<const char*>& array)
+		void parseArray(const char* json, JsonArray& array)
 		{
 			RIO_ASSERT_NOT_NULL(json);
 
@@ -241,7 +241,7 @@ namespace Rio
 			RIO_FATAL("Bad array");
 		}
 
-		void parseObject(const char* json, Map<DynamicString, const char*>& object)
+		void parseObject(const char* json, JsonObject& object)
 		{
 			RIO_ASSERT_NOT_NULL(json);
 
@@ -259,15 +259,20 @@ namespace Rio
 
 				while (*json)
 				{
-					DynamicString key;
+					const char* keyBegin = *json == '"' ? (json + 1) : json;
+
+					TempAllocator256 ta;
+					DynamicString key(ta);
 					parseString(json, key);
+
+					FixedString fixedSizeKey(keyBegin, key.getLength());
 
 					json = skipString(json);
 					json = skipSpaces(json);
 					json = getNext(json, ':');
 					json = skipSpaces(json);
 
-					MapFn::set(object, key, json);
+					MapFn::set(object, fixedSizeKey, json);
 
 					json = skipValue(json);
 					json = skipSpaces(json);
@@ -285,6 +290,18 @@ namespace Rio
 
 			RIO_FATAL("Bad object");
 		}
-	} // namespace Json
 
+		void parse(const char* json, JsonObject& object)
+		{
+			RIO_ASSERT_NOT_NULL(json);
+			parseObject(json, object);
+		}
+
+		void parse(Buffer& json, JsonObject& object)
+		{
+			ArrayFn::pushBack(json, '\0');
+			ArrayFn::popBack(json);
+			parse(ArrayFn::begin(json), object);
+		}
+	} // namespace Json
 } // namespace Rio

@@ -1,7 +1,7 @@
 // Copyright (c) 2015 Volodymyr Syvochka
 #include "JsonParser.h"
 
-#include "Core/Json/Njson.h"
+#include "Core/Json/Rjson.h"
 #include "Core/Memory/TempAllocator.h"
 #include "Core/Strings/StringUtils.h"
 #include "Core/FileSystem/File.h"
