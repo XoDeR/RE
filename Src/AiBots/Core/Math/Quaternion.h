@@ -215,6 +215,11 @@ namespace Rio
 		Radian getPitch(const Quaternion& q);
 		Radian getYaw(const Quaternion& q);
 
+		Quaternion getLook(const Vector3& dir, const Vector3& up = Vector3::Yaxis);
+		Vector3 getRight(const Quaternion& q);
+		Vector3 getUp(const Quaternion& q);
+		Vector3 getForward(const Quaternion& q);
+
 		EulerAngles quaternionToEulerAngles(const Quaternion& q);
 		Quaternion eulerAnglesToQuaternion(const EulerAngles& e,
 			const Vector3& xAxis = { 1, 0, 0 },

@@ -59,14 +59,13 @@ namespace Rio
 
 		inline bool doesContainPoint(const Frustum& f, const Vector3& p)
 		{
-			if (PlaneFn::getDistanceToPoint(f.left, p) < 0.0) return false;
-			if (PlaneFn::getDistanceToPoint(f.right, p) < 0.0) return false;
-			if (PlaneFn::getDistanceToPoint(f.bottom, p) < 0.0) return false;
-			if (PlaneFn::getDistanceToPoint(f.top, p) < 0.0) return false;
-			if (PlaneFn::getDistanceToPoint(f.near, p) < 0.0) return false;
-			if (PlaneFn::getDistanceToPoint(f.far, p) < 0.0) return false;
-
-			return true;
+			return !(PlaneFn::getDistanceToPoint(f.left, p) < 0.0f
+				|| PlaneFn::getDistanceToPoint(f.right, p) < 0.0f
+				|| PlaneFn::getDistanceToPoint(f.bottom, p) < 0.0f
+				|| PlaneFn::getDistanceToPoint(f.top, p) < 0.0f
+				|| PlaneFn::getDistanceToPoint(f.near, p) < 0.0f
+				|| PlaneFn::getDistanceToPoint(f.far, p) < 0.0f
+				);
 		}
 
 		inline Vector3 getVertexByIndex(const Frustum& f, uint32_t index)
@@ -143,9 +142,6 @@ namespace Rio
 
 		inline Aabb toAabb(const Frustum& f)
 		{
-			Aabb tmp;
-			AabbFn::reset(tmp);
-
 			Vector3 vertices[8];
 			vertices[0] = getVertexByIndex(f, 0);
 			vertices[1] = getVertexByIndex(f, 1);
@@ -156,9 +152,10 @@ namespace Rio
 			vertices[6] = getVertexByIndex(f, 6);
 			vertices[7] = getVertexByIndex(f, 7);
 
-			AabbFn::addPoints(tmp, 8, vertices);
-
-			return tmp;
+			Aabb aabb;
+			AabbFn::reset(aabb);
+			AabbFn::addPoints(aabb, 8, vertices);
+			return aabb;
 		}
 	} // namespace FrustumFn
 

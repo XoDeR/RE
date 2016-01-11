@@ -65,17 +65,29 @@ namespace Rio
 
 		inline float sin(float x)
 		{
-			return sinf(x);
+			return ::sinf(x);
 		}
 
 		inline float cos(float x)
 		{
-			return cosf(x);
+			return ::cosf(x);
 		}
 
 		inline float fmod(float n, float d)
 		{
 			return ::fmod(n, d);
+		}
+
+		//*****************
+		// Interpolation
+		//*****************
+
+		// Linear Interpolation
+		template <typename T>
+		inline T lerp(const T& x, const T& y, float t)
+		{
+			RIO_ASSERT(t >= 0.0f && t <= 1.0f, "MathFn::lerp t out range (0..1).");
+			return x * (1.0f - t) + (y * t);
 		}
 
 		// Returns the linear interpolated value between p0 and p1 at time t
@@ -133,6 +145,61 @@ namespace Rio
 				((-p0 + (3.0 * p1) + (-3.0 * p2) + p3) * ttt);
 
 			return tmp * 0.5;
+		}
+
+		// Returns the linear interpolated value
+		inline float getLerp(const float p0, const float p1, float t)
+		{
+			return (1.0f - t) * p0 + t * p1;
+		}
+
+		// Returns the cosine interpolated value
+		inline float getCosine(const float p0, const float p1, float t)
+		{
+			const float f = t * MathFn::Pi;
+			const float g = (1.0f - MathFn::cos(f)) * 0.5f;
+
+			return p0 + g * (p1 - p0);
+		}
+
+		// Returns the cubic interpolated value 
+		inline float getCubic(const float p0, const float p1, float t)
+		{
+			const float tt = t * t;
+			const float ttt = tt * t;
+
+			return p0 * (2.0f * ttt - 3.0f * tt + 1.0f) + p1 * (3.0f * tt - 2.0f * ttt);
+		}
+
+		// Bezier interpolation
+		inline float getBezier(const float p0, const float p1, const float p2, const float p3, float t)
+		{
+			const float u = 1.0f - t;
+			const float tt = t * t;
+			const float uu = u * u;
+			const float uuu = uu * u;
+			const float ttt = tt * t;
+
+			const float tmp = (uuu * p0)
+				+ (3.0f * uu * t * p1)
+				+ (3.0f * u * tt * p2)
+				+ (ttt * p3);
+
+			return tmp;
+		}
+
+		// Catmull-Rom interpolation
+		inline float getCatmullRom(const float p0, const float p1, const float p2, const float p3, float t)
+		{
+			const float tt = t * t;
+			const float ttt = tt * t;
+
+			const float tmp = (2.0f * p1)
+				+ (-p0 + p2) * t
+				+ ((2.0f * p0) - (5.0f * p1) + (4.0f * p2) - p3) * tt
+				+ (-p0 + (3.0f * p1) + (-3.0f * p2) + p3) * ttt;
+
+			return tmp * 0.5f;
 		}
 
 
@@ -228,22 +295,6 @@ namespace Rio
 		{
 			return i == j ? T(1) : T(0);
 		}
-
-		//*****************
-		// Interpolation
-		//*****************
-
-		// Linear Interpolation
-		template <typename T>
-		inline T lerp(const T& x, const T& y, float t)
-		{
-			RIO_ASSERT(t >= 0.0f && t <= 1.0f, "MathFn::lerp `t` out range (0..1).");
-
-			return x * (1.0f - t) + (y * t);
-		}
-
-
-
 
 	} // namespace MathFn
 } // namespace Rio

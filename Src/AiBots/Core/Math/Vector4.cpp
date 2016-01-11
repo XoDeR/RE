@@ -13,7 +13,7 @@ namespace Rio
 
 	float Vector4Fn::getLength(const Vector4& a)
 	{
-		return MathFn::sqrt(a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w);
+		return MathFn::sqrt(Vector4Fn::getLengthSquared(a));
 	}
 
 	bool operator==(const Vector4& a, const Vector4& b)

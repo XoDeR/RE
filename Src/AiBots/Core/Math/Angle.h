@@ -8,6 +8,8 @@ namespace Rio
 {
 	namespace Impl
 	{
+		using namespace MathFn;
+
 		template <typename T>
 		class Radian;
 

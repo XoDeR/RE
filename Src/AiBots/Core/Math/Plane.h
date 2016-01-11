@@ -42,6 +42,14 @@ namespace Rio
 		// Returns the signed distance between plane and point
 		float getDistanceToPoint(const Plane& p, const Vector3& point);
 
+		inline Plane createPlaneFromPointAndNormal(const Vector3& point, const Vector3& normal)
+		{
+			Plane p;
+			p.n = normal;
+			p.d = -Vector3Fn::dot(normal, point);
+			return p;
+		}
+
 		inline float getDistanceToPoint(const Plane& p, const Vector3& point)
 		{
 			return Vector3Fn::dot(p.n, point) + p.d;

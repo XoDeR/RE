@@ -228,6 +228,12 @@ namespace Rio
 		void setLength(Vector3& a, float len);
 		Vector3 normalize(Vector3& a);
 		float getDistance(const Vector3& a, const Vector3& b);
+		
+		inline float getDistanceSquared(const Vector3& a, const Vector3& b)
+		{
+			return getLengthSquared(b - a);
+		}
+
 		Radian getAngle(const Vector3& a, const Vector3& b);
 		float* toFloatPtr(Vector3& a);
 		const float* toFloatPtr(const Vector3& a);
@@ -286,6 +292,36 @@ namespace Rio
 		inline Vector2 toVector2(const Vector3& a)
 		{
 			return Vector2(a.x, a.y);
+		}
+
+		// Returns a vector that contains the largest value for each component
+		inline Vector3 getMax(const Vector3& a, const Vector3& b)
+		{
+			Vector3 v;
+			v.x = MathFn::max(a.x, b.x);
+			v.y = MathFn::max(a.y, b.y);
+			v.z = MathFn::max(a.z, b.z);
+			return v;
+		}
+
+		// Returns a vector that contains the smallest value for each component
+		inline Vector3 getMin(const Vector3& a, const Vector3& b)
+		{
+			Vector3 v;
+			v.x = MathFn::min(a.x, b.x);
+			v.y = MathFn::min(a.y, b.y);
+			v.z = MathFn::min(a.z, b.z);
+			return v;
+		}
+
+		// Returns the linearly interpolated vector at time t in [0, 1]
+		inline Vector3 getLerp(const Vector3& a, const Vector3& b, float t)
+		{
+			Vector3 v;
+			v.x = MathFn::lerp(a.x, b.x, t);
+			v.y = MathFn::lerp(a.y, b.y, t);
+			v.z = MathFn::lerp(a.z, b.z, t);
+			return v;
 		}
 	} // namespace Vector3Fn
 

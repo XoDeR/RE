@@ -14,21 +14,41 @@ namespace Rio
 {
 	float getRayWithPlaneIntersection(const Vector3& from, const Vector3& dir, const Plane& p)
 	{
-		float nd = Vector3Fn::dot(dir, p.n);
-		float orpn = Vector3Fn::dot(from, p.n);
-		float dist = -1.0f;
-		if (nd < 0.0f)
+		const float num = Vector3Fn::dot(from, p.n);
+		const float den = Vector3Fn::dot(dir, p.n);
+
+		if (MathFn::equals(den, 0.0f))
 		{
-			dist = (-p.d - orpn) / nd;
+			return -1.0f;
 		}
-		return dist > 0.0f ? dist : -1.0f;
+
+		return (-p.d - num) / den;
+	}
+
+	float getRayWithDiscIntersection(const Vector3& from, const Vector3& dir, const Vector3& center, float radius, const Vector3& normal)
+	{
+		const Plane p = PlaneFn::createPlaneFromPointAndNormal(center, normal);
+		const float t = getRayWithPlaneIntersection(from, dir, p);
+
+		if (t == -1.0f)
+		{
+			return -1.0f;
+		}
+
+		const Vector3 intersectionPoint = from + dir * t;
+		if (Vector3Fn::getDistanceSquared(intersectionPoint, center) < radius*radius)
+		{
+			return t;
+		}
+
+		return -1.0f;
 	}
 
 	float getRayWithSphereIntersection(const Vector3& from, const Vector3& dir, const Sphere& s)
 	{
-		Vector3 v = s.c - from;
-		float b = Vector3Fn::dot(v, dir);
-		float det = (s.r * s.r) - Vector3Fn::dot(v, v) + (b * b);
+		const Vector3 v = s.c - from;
+		const float b = Vector3Fn::dot(v, dir);
+		const float det = (s.r * s.r) - Vector3Fn::dot(v, v) + (b * b);
 		if (det < 0.0 || b < s.r)
 		{
 			return -1.0f;
@@ -36,24 +56,64 @@ namespace Rio
 		return b - MathFn::sqrt(det);
 	}
 
-	float getRayWithOobIntersection(const Vector3& from, const Vector3& dir, const Obb& obb)
+	float getRayWithOobIntersection(const Vector3& from, const Vector3& dir, const Matrix4x4& tm, const Vector3& halfExtents)
 	{
 		using namespace Vector3Fn;
 
 		float tmin = 0.0f;
 		float tmax = 100000.0f;
 
-		Vector3 obb_pos(obb.tm.t.x, obb.tm.t.y, obb.tm.t.z);
-		Vector3 delta = obb_pos - from;
+		const Vector3 obb_pos = Vector3(tm.t.x, tm.t.y, tm.t.z);
+		const Vector3 delta = obb_pos - from;
 		{
-			const Vector3 xaxis(obb.tm.x.x, obb.tm.x.y, obb.tm.x.z);
-			float e = dot(xaxis, delta);
-			float f = dot(dir, xaxis);
+			const Vector3 xaxis = Vector3(tm.x.x, tm.x.y, tm.x.z);
+			const float e = dot(xaxis, delta);
+			const float f = dot(dir, xaxis);
 
 			if (fabs(f) > 0.001f)
 			{
-				float t1 = (e + obb.aabb.min.x) / f;
-				float t2 = (e + obb.aabb.max.x) / f;
+				float t1 = (e - halfExtents.x) / f;
+				float t2 = (e + halfExtents.x) / f;
+
+				if (t1 > t2)
+				{
+					float w = t1; t1 = t2; t2 = w;
+				}
+
+				if (t2 < tmax)
+				{
+					tmax = t2;
+				}
+				if (t1 > tmin)
+				{
+					tmin = t1;
+				}
+
+				if (tmax < tmin)
+				{
+					return -1.0f;
+				}
+
+			}
+			else
+			{
+				if (-e - halfExtents.x > 0.0f || -e + halfExtents.x < 0.0f)
+				{
+					return -1.0f;
+				}
+			}
+		}
+
+		{
+			const Vector3 yaxis = Vector3(tm.y.x, tm.y.y, tm.y.z);
+			const float e = dot(yaxis, delta);
+			const float f = dot(dir, yaxis);
+
+			if (fabs(f) > 0.001f)
+			{
+
+				float t1 = (e - halfExtents.y) / f;
+				float t2 = (e + halfExtents.y) / f;
 
 				if (t1 > t2)
 				{
@@ -65,53 +125,26 @@ namespace Rio
 				if (t1 > tmin)
 					tmin = t1;
 
-				if (tmax < tmin)
-					return -1.0f;
-			}
-			else
-			{
-				if (-e + obb.aabb.min.x > 0.0f || -e + obb.aabb.max.x < 0.0f)
-					return -1.0f;
-			}
-		}
-
-		{
-			const Vector3 yaxis(obb.tm.y.x, obb.tm.y.y, obb.tm.y.z);
-			float e = dot(yaxis, delta);
-			float f = dot(dir, yaxis);
-
-			if (fabs(f) > 0.001f){
-
-				float t1 = (e + obb.aabb.min.y) / f;
-				float t2 = (e + obb.aabb.max.y) / f;
-
-				if (t1 > t2){ float w = t1; t1 = t2; t2 = w; }
-
-				if (t2 < tmax)
-					tmax = t2;
-				if (t1 > tmin)
-					tmin = t1;
-
 				if (tmin > tmax)
 					return -1.0f;
 			}
 			else
 			{
-				if (-e + obb.aabb.min.y > 0.0f || -e + obb.aabb.max.y < 0.0f)
+				if (-e - halfExtents.y > 0.0f || -e + halfExtents.y < 0.0f)
 					return -1.0f;
 			}
 		}
 
 		{
-			const Vector3 zaxis(obb.tm.z.x, obb.tm.z.y, obb.tm.z.z);
-			float e = dot(zaxis, delta);
-			float f = dot(dir, zaxis);
+			const Vector3 zaxis = Vector3(tm.z.x, tm.z.y, tm.z.z);
+			const float e = dot(zaxis, delta);
+			const float f = dot(dir, zaxis);
 
 			if (fabs(f) > 0.001f)
 			{
 
-				float t1 = (e + obb.aabb.min.z) / f;
-				float t2 = (e + obb.aabb.max.z) / f;
+				float t1 = (e - halfExtents.z) / f;
+				float t2 = (e + halfExtents.z) / f;
 
 				if (t1 > t2){ float w = t1; t1 = t2; t2 = w; }
 
@@ -126,29 +159,33 @@ namespace Rio
 			}
 			else
 			{
-				if (-e + obb.aabb.min.z > 0.0f || -e + obb.aabb.max.z < 0.0f)
+				if (-e - halfExtents.z > 0.0f || -e + halfExtents.z < 0.0f)
+				{
 					return -1.0f;
+				}
 			}
 		}
 
-	return tmin;
+		return tmin;
 	}
 
 	bool getPlanesIntersection(const Plane& p1, const Plane& p2, const Plane& p3, Vector3& ip)
 	{
-		const Vector3& n1 = p1.n;
-		const Vector3& n2 = p2.n;
-		const Vector3& n3 = p3.n;
+		const Vector3 n1 = p1.n;
+		const Vector3 n2 = p2.n;
+		const Vector3 n3 = p3.n;
 
-		float den = -Vector3Fn::dot(Vector3Fn::cross(n1, n2), n3);
+		const float den = -Vector3Fn::dot(Vector3Fn::cross(n1, n2), n3);
 
-		if (MathFn::equals(den, (float)0.0))
+		if (MathFn::equals(den, 0.0f))
 		{
 			return false;
 		}
 
+		const float invDen = 1.0f / den;
+
 		Vector3 res = p1.d * Vector3Fn::cross(n2, n3) + p2.d * Vector3Fn::cross(n3, n1) + p3.d * Vector3Fn::cross(n1, n2);
-		ip = res / den;
+		ip = res * invDen;
 
 		return true;
 	}

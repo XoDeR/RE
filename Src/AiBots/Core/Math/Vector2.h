@@ -234,6 +234,11 @@ namespace Rio
 			return getLength(b - a);
 		}
 
+		inline float getDistanceSquared(const Vector2& a, const Vector2& b)
+		{
+			return getLengthSquared(b - a);
+		}
+
 		inline float* toFloatPtr(Vector2& a)
 		{
 			return &a.x;
@@ -242,6 +247,33 @@ namespace Rio
 		inline const float* toFloatPtr(const Vector2& a)
 		{
 			return &a.x;
+		}
+
+		// Returns a vector that contains the largest value for each component from vectors
+		inline Vector2 getMax(const Vector2& a, const Vector2& b)
+		{
+			Vector2 v;
+			v.x = MathFn::max(a.x, b.x);
+			v.y = MathFn::max(a.y, b.y);
+			return v;
+		}
+
+		// Returns a vector that contains the smallest value for each component from vectors
+		inline Vector2 getMin(const Vector2& a, const Vector2& b)
+		{
+			Vector2 v;
+			v.x =  MathFn::min(a.x, b.x);
+			v.y =  MathFn::min(a.y, b.y);
+			return v;
+		}
+
+		// Returns the linearly interpolated vector at time t in [0, 1]
+		inline Vector2 getLerp(const Vector2& a, const Vector2& b, float t)
+		{
+			Vector2 v;
+			v.x = MathFn::lerp(a.x, b.x, t);
+			v.y = MathFn::lerp(a.y, b.y, t);
+			return v;
 		}
 
 	} // namespace Vector2Fn
