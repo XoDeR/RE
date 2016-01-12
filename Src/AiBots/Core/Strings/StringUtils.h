@@ -5,6 +5,7 @@
 
 #include "Core/Debug/Error.h"
 #include "Core/Base/Types.h"
+#include "Core/Base/Platform.h"
 
 #include <cstdio>
 #include <cstring>
@@ -72,6 +73,11 @@ namespace Rio
 		int32_t len = vsnPrintf(str, n, format, args);
 		va_end(args);
 		return len;
+	}
+
+	inline uint32_t strLen32(const char* str)
+	{
+		return (uint32_t)strLen(str);
 	}
 
 	inline const char* skipSpaces(const char* str)
@@ -159,59 +165,59 @@ namespace Rio
 
 		size_t i = 0;
 
-		char* out_iterator = out;
+		char* outIterator = out;
 
 		while (begin != end && i < len)
 		{
-			(*out_iterator) = (*begin);
+			(*outIterator) = (*begin);
 
 			begin++;
-			out_iterator++;
+			outIterator++;
 			i++;
 		}
 
 		out[i] = '\0';
 	}
 
-	inline int32_t parseInt(const char* string)
+	inline int32_t parseInt(const char* str)
 	{
 		int val;
-		int ok = sscanf(string, "%d", &val);
+		int ok = sscanf(str, "%d", &val);
 
-		RIO_ASSERT(ok == 1, "Failed to parse int: %s", string);
+		RIO_ASSERT(ok == 1, "Failed to parse int: %s", str);
 		RIO_UNUSED(ok);
 
 		return val;
 	}
 
-	inline uint32_t parseUint(const char* string)
+	inline uint32_t parseUint(const char* str)
 	{
 		unsigned int val;
-		int ok = sscanf(string, "%u", &val);
+		int ok = sscanf(str, "%u", &val);
 
-		RIO_ASSERT(ok == 1, "Failed to parse uint: %s", string);
+		RIO_ASSERT(ok == 1, "Failed to parse uint: %s", str);
 		RIO_UNUSED(ok);
 
 		return val;
 	}
 
-	inline float parseFloat(const char* string)
+	inline float parseFloat(const char* str)
 	{
 		float val;
-		int ok = sscanf(string, "%f", &val);
+		int ok = sscanf(str, "%f", &val);
 
-		RIO_ASSERT(ok == 1, "Failed to parse float: %s", string);
+		RIO_ASSERT(ok == 1, "Failed to parse float: %s", str);
 		RIO_UNUSED(ok);
 
 		return val;
 	}
 
-	inline double parseDouble(const char* string)
+	inline double parseDouble(const char* str)
 	{
 		double val;
-		int ok = sscanf(string, "%lf", &val);
+		int ok = sscanf(str, "%lf", &val);
 
-		RIO_ASSERT(ok == 1, "Failed to parse float: %s", string);
+		RIO_ASSERT(ok == 1, "Failed to parse float: %s", str);
 		RIO_UNUSED(ok);
 
 		return val;
@@ -232,6 +238,7 @@ namespace Rio
 
 		return c;
 	}
+
 	// returns true if the character is whitespace
 	inline bool isSpace(const char c)
 	{
@@ -239,20 +246,25 @@ namespace Rio
 		for (size_t i = 0; i < 6; i++)
 		{
 			if (c == whiteSpace[i])
+			{
 				return true;
+			}
 		}
 		return false;
 	}
+
 	// returns true if the character is [a-zA-Z]
 	inline bool isAlpha(const char c)
 	{
 		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 	}
+
 	// returns true if the character is [0-9]
 	inline bool isDigit(const char c)
 	{
 		return (c >= '0' && c <= '9');
 	}
+
 	// returns true if the character is [a-zA-Z0-9]
 	inline bool isAlphaNumeric(const char c)
 	{
