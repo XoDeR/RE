@@ -4,6 +4,8 @@
 #include "Core/Base/Config.h"
 
 #include "Core/Debug/Error.h"
+
+#include "Core/Memory/Memory.h"
 #include "Core/Memory/Allocator.h"
 
 namespace Rio
@@ -25,6 +27,8 @@ namespace Rio
 		size_t capacity;
 		size_t size;
 		T* innerVectorData;
+
+		ALLOCATOR_AWARE;
 	};
 
 	namespace VectorFn
@@ -124,14 +128,14 @@ namespace Rio
 				v.capacity = capacity;
 				v.innerVectorData = (T*)v.allocator->allocate(capacity * sizeof(T), RIO_ALIGNOF(T));
 
-				for (size_t i = 0; i < v.size; i++)
+				for (size_t i = 0; i < v.size; ++i)
 				{
 					new (v.innerVectorData + i) T(tmp[i]);
 				}
 
-				if (tmp)
+				if (tmp != nullptr)
 				{
-					for (size_t i = 0; i < v.size; i++)
+					for (size_t i = 0; i < v.size; ++i)
 					{
 						tmp[i].~T();
 					}
@@ -189,7 +193,7 @@ namespace Rio
 			}
 
 			T* arr = &v.innerVectorData[v.size];
-			for (size_t i = 0; i < count; i++)
+			for (size_t i = 0; i < count; ++i)
 			{
 				arr[i] = items[i];
 			}
@@ -201,7 +205,7 @@ namespace Rio
 		template <typename T>
 		inline void clear(Vector<T>& v)
 		{
-			for (size_t i = 0; i < v.size; i++)
+			for (size_t i = 0; i < v.size; ++i)
 			{
 				v.innerVectorData[i].~T();
 			}
@@ -294,7 +298,7 @@ namespace Rio
 	template <typename T>
 	inline Vector<T>::~Vector()
 	{
-		for (size_t i = 0; i < size; i++)
+		for (size_t i = 0; i < size; ++i)
 		{
 			innerVectorData[i].~T();
 		}
@@ -325,7 +329,7 @@ namespace Rio
 		const size_t size = VectorFn::getCount(other);
 		VectorFn::resize(*this, size);
 
-		for (size_t i = 0; i < size; i++)
+		for (size_t i = 0; i < size; ++i)
 		{
 			this->innerVectorData[i] = innerVectorData._array[i];
 		}

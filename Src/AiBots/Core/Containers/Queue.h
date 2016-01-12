@@ -2,8 +2,15 @@
 #pragma once
 
 #include "Core/Base/Config.h"
-#include "Core/Containers/Array.h"
+#include "Core/Base/Types.h"
+
 #include "Core/Debug/Error.h" // RIO_ASSERT
+
+#include "Core/Memory/Memory.h"
+#include "Core/Memory/Allocator.h"
+
+#include "Core/Containers/Array.h"
+
 #include <cstring> // memcpy
 
 namespace Rio
@@ -21,6 +28,8 @@ namespace Rio
 		size_t offset;
 		size_t size;
 		Array<T> innerQueueData;
+
+		ALLOCATOR_AWARE;
 	};
 
 	// Functions to manipulate Queue.
@@ -29,8 +38,7 @@ namespace Rio
 		template<typename T> bool getIsEmpty(const Queue<T>& q);
 		template<typename T> size_t getCount(const Queue<T>& q);
 
-		// Returns the number of items the queue can hold before
-		// a resize must occur.
+		// Returns the number of items the queue can hold before a resize must occur.
 		template<typename T> size_t getSpace(const Queue<T>& q);
 
 		// Increase/decrease the capacity of the queue.
@@ -105,7 +113,7 @@ namespace Rio
 			size_t oldSize = ArrayFn::getCount(q.innerQueueData);
 			ArrayFn::resize(q.innerQueueData, capacity);
 
-			if (q.offset + q.size > old_size)
+			if (q.offset + q.size > oldSize)
 			{
 				memmove(ArrayFn::begin(q.innerQueueData) + capacity - (oldSize - q.offset),
 					ArrayFn::begin(q.innerQueueData) + q.offset,
@@ -146,14 +154,14 @@ namespace Rio
 
 			q[q.size] = item;
 
-			q.size++;
+			++(q.size);
 		}
 
 		template <typename T>
 		inline void popBack(Queue<T>& q)
 		{
 			RIO_ASSERT(q.size > 0, "The queue is empty");
-			q.size--;
+			--(q.size);
 		}
 
 		template <typename T>
@@ -165,10 +173,8 @@ namespace Rio
 			}
 
 			q.offset = (q.offset - 1 + ArrayFn::getCount(q.innerQueueData)) % ArrayFn::getCount(q.innerQueueData);
-
 			q[0] = item;
-
-			q.size++;
+			++(q.size);
 		}
 
 		template <typename T>
@@ -177,7 +183,7 @@ namespace Rio
 			RIO_ASSERT(q.size > 0, "The queue is empty");
 
 			q.offset = (q.offset + 1) % ArrayFn::getCount(q.innerQueueData);
-			q.size--;
+			--(q.size);
 		}
 
 		template <typename T>
@@ -191,17 +197,17 @@ namespace Rio
 			const size_t size = ArrayFn::getCount(q.innerQueueData);
 			const size_t insert = (q.offset + q.size) % size;
 
-			size_t to_insert = n;
-			if (insert + to_insert > size)
+			size_t toInsert = n;
+			if (insert + toInsert > size)
 			{
-				to_insert = size - insert;
+				toInsert = size - insert;
 			}
 
-			memcpy(ArrayFn::begin(q.innerQueueData) + insert, items, to_insert * sizeof(T));
+			memcpy(ArrayFn::begin(q.innerQueueData) + insert, items, toInsert * sizeof(T));
 
-			q.size += to_insert;
-			items += to_insert;
-			n -= to_insert;
+			q.size += toInsert;
+			items += toInsert;
+			n -= toInsert;
 			memcpy(ArrayFn::begin(q.innerQueueData), items, n * sizeof(T));
 
 			q.size += n;

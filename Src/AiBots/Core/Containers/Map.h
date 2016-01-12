@@ -3,7 +3,17 @@
 
 #include "Core/Base/Config.h"
 
+#include "Core/Base/Types.h"
+
+#include "Core/Debug/Error.h" // RIO_ASSERT
+
+#include "Core/Memory/Memory.h"
+#include "Core/Memory/Allocator.h"
+
 #include "Core/Containers/Vector.h"
+#include "Core/Containers/Pair.h"
+
+#include <cstring> // memcpy
 
 // #define RBTREE_VERIFY
 
@@ -22,18 +32,26 @@ namespace Rio
 		const TValue& operator[](const TKey& key) const;
 		struct Node
 		{
-			TKey key;
-			TValue value;
+			Node(Allocator& a)
+				: pair(a)
+			{
+			}
+
+			PAIR(TKey, TValue) pair;
 			size_t left;
 			size_t right;
 			size_t parent;
 			uint32_t color;
+
+			ALLOCATOR_AWARE;
 		};
 
 		size_t root;
 		// special node traversal path terminator
 		size_t sentinel;
 		Vector<Node> data;
+
+		ALLOCATOR_AWARE;
 	};
 
 	template <typename TKey, typename TValue>
@@ -262,7 +280,7 @@ namespace Rio
 		{
 			RIO_ASSERT(x < VectorFn::getCount(m.data), "Index out of bounds (size = %d, n = %d)", VectorFn::getCount(m.data), x);
 
-			uint32_t y = getLeft(m, x);
+			size_t y = getLeft(m, x);
 			m.data[x].left = getRight(m, y);
 
 			if (getRight(m, y) != m.sentinel)
@@ -528,9 +546,9 @@ namespace Rio
 		template <typename TKey, typename TValue>
 		inline void set(Map<TKey, TValue>& m, const TKey& key, const TValue& value)
 		{
-			typename Map<TKey, TValue>::Node node;
-			node.key = key;
-			node.value = value;
+			typename Map<TKey, TValue>::Node node(*m.data.allocator);
+			node.pair.first = key;
+			node.pair.second = value;
 			node.color = MapInternal::RED;
 			node.left = m.sentinel;
 			node.right = m.sentinel;
@@ -741,7 +759,4 @@ namespace Rio
 			return VectorFn::end(m.data);
 		}
 	} // namespace MapFn
-
-
-
 } // namespace Rio
