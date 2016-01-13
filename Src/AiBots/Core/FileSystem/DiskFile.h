@@ -7,38 +7,33 @@
 #include "Core/FileSystem/OsFile.h"
 #include "Core/FileSystem/File.h"
 
-namespace Rio 
+namespace Rio
 {
-
-// Provides common facilities to access files on disk.
-class DiskFile: public File
-{
-public:
-	// Opens filename with specified mode
-	DiskFile(FileOpenMode mode, const char* filename);
-	virtual ~DiskFile();
-	void seek(size_t position);
-	void seekToEnd();
-	void skip(size_t bytes);
-	size_t read(void* buffer, size_t size);
-	void write(const void* buffer, size_t size);
-	bool copyToFile(File& file, size_t size = 0);
-	void flush();
-	bool getIsEndOfFile();
-	bool isValid();
-	size_t getFileSize();
-	size_t getFilePosition();
-	bool canReadFile() const;
-	bool canWriteFile() const;
-	bool canSeekFile() const;
-protected:
-	OsFile file;
-	bool lastOperationWasRead;
-protected:
-	inline void checkIsFileValid() const
+	// file on disk.
+	class DiskFile : public File
 	{
-		RIO_ASSERT(file.isFileOpen(), "File is not open");
-	}
-};
+	public:
+		DiskFile();
+		virtual ~DiskFile();
+		void open(const char* path, FileOpenMode mode);
+		void close();
+		void seek(size_t position);
+		void seekToEnd();
+		void skip(size_t bytes);
+		size_t read(void* data, size_t size);
+		size_t write(const void* data, size_t size);
+		void flush();
+		bool getIsEndOfFile();
+		bool isValid();
+		size_t getFileSize();
+		size_t getFilePosition();
+	protected:
+		OsFile file;
+	protected:
+		inline void checkIsFileValid() const
+		{
+			RIO_ASSERT(file.isFileOpen(), "File is not open");
+		}
+	};
 
 } // namespace Rio

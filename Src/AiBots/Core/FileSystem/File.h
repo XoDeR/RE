@@ -2,12 +2,10 @@
 #pragma once
 
 #include "Core/Base/Config.h"
-
 #include "Core/Base/Types.h"
 
 namespace Rio
 {
-
 	enum class FileOpenMode
 	{
 		Read = 1,
@@ -23,12 +21,13 @@ namespace Rio
 	class File
 	{
 	public:
-		// Opens the file with the given mode
-		File(FileOpenMode mode) 
-			: fileOpenMode(mode) 
+		File() 
 		{}
 		virtual ~File() 
 		{};
+
+		virtual void open(const char* path, FileOpenMode mode) = 0;
+		virtual void close() = 0;
 		// Sets the position indicator of the file to position.
 		virtual void seek(size_t position) = 0;
 		// Sets the position indicator to the end of the file
@@ -36,15 +35,12 @@ namespace Rio
 		// Sets the position indicator to bytes after current position
 		virtual void skip(size_t bytes) = 0;
 		// Reads a block of data from the file.
-		virtual size_t read(void* buffer, size_t size) = 0;
+		virtual size_t read(void* data, size_t size) = 0;
 		// Writes a block of data to the file.
-		virtual void write(const void* buffer, size_t size) = 0;
-		// Copies a chunk of size bytes of data from this to another file.
-		virtual bool copyToFile(File& file, size_t size = 0) = 0;
+		virtual size_t write(const void* data, size_t size) = 0;
 		// Forces the previous write operations to complete.
 		// Write operations in the file system are not performed instantly
-		// the output data may be stored to a temporary buffer before making its way to
-		// the file. 
+		// the output data may be stored to a temporary buffer before making its way to the file. 
 		// This method forces all the pending output operations to be written to the file.
 		virtual void flush() = 0;
 		// Returns whether the file is valid.
@@ -58,11 +54,6 @@ namespace Rio
 		// For binary data, it means the number of bytes
 		// from the beginning of the file.
 		virtual size_t getFilePosition() = 0;
-		virtual bool canReadFile() const = 0;
-		virtual bool canWriteFile() const = 0;
-		virtual bool canSeekFile() const = 0;
-	protected:
-		FileOpenMode fileOpenMode;
 	};
 
 } // namespace Rio

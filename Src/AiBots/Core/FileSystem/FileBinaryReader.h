@@ -12,7 +12,10 @@ namespace Rio
 	class FileBinaryReader
 	{
 	public:
-		FileBinaryReader(File& file) : file(file) {}
+		FileBinaryReader(File& file) 
+			: file(file) 
+		{}
+
 		size_t read(void* data, size_t size)
 		{
 			return file.read(data, size);

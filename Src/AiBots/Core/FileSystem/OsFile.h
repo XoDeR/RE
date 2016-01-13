@@ -2,16 +2,18 @@
 #pragma once
 
 #include "Core/Base/Config.h"
+#include "Core/Base/Platform.h"
 
 #include "Core/Base/Types.h"
 #include "Core/Debug/Error.h"
 #include "Core/FileSystem/File.h" // FileOpenMode
 
 #if RIO_PLATFORM_POSIX
-#include <cstdio>
+	#include <cstdio>
+	#include <errno.h>
 #elif RIO_PLATFORM_WINDOWS
-#include "tchar.h"
-#include "Core/Os/Windows/Headers_Windows.h"
+	#include "tchar.h"
+	#include "Core/Os/Windows/Headers_Windows.h"
 #endif
 
 namespace Rio
@@ -20,17 +22,17 @@ namespace Rio
 	class OsFile
 	{
 	public:
-		// Opens the file located at path with the given mode.
-		OsFile(const char* path, FileOpenMode mode);
+		OsFile()
+		{}
+
 		~OsFile()
 		{
 			close();
 		}
+
+		void open(const char* path, FileOpenMode mode);
 		void close();
-		bool isFileOpen() const
-		{
-			return file != NULL;
-		}
+		bool isFileOpen() const;
 		size_t getFileSize() const;
 		// Reads size bytes from the file and stores it into data.
 		// Returns the number of bytes read.
@@ -39,6 +41,7 @@ namespace Rio
 		// Returns the number of bytes written
 		size_t write(const void* data, size_t size);
 		// Moves the file pointer to the given position.
+		void flush();
 		void seek(size_t position);
 		// Moves the file pointer to the end of the file.
 		void seekToEnd();
@@ -50,11 +53,13 @@ namespace Rio
 		bool getIsEndOfFile() const;
 	private:
 #if RIO_PLATFORM_POSIX
-		FILE* file;
+		FILE* file = NULL;
 #elif RIO_PLATFORM_WINDOWS
-		HANDLE file;
-		bool isEndOfFile;
+		HANDLE file = INVALID_HANDLE_VALUE;
+		bool isEndOfFile = false;
 #endif
 	};
+
+	
 
 } // namespace Rio
