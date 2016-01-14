@@ -3,7 +3,7 @@
 
 #include "Core/Base/Config.h"
 
-namespace Rio 
+namespace Rio
 {
-	void stacktrace();
+	void printCallStack();
 } // namespace Rio
